@@ -152,6 +152,25 @@
       opacity: 0.6;
     }
 
+    .logout-button {
+      background: #d32f2f;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .logout-button:hover {
+      background: #b71c1c;
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
     .map-container {
       flex: 0 0 50%;
       position: relative;
@@ -784,6 +803,11 @@
         justify-content: center;
       }
 
+      .logout-button {
+        width: 100%;
+        justify-content: center;
+      }
+
       .map-container {
         flex: 0 0 400px;
         min-height: 400px;
@@ -1115,7 +1139,7 @@
       <div id="currentMonth" style="color: white; font-weight: 600; font-size: 1rem; min-width: 120px; text-align: center;">
        All Data
       </div><button class="month-nav-button" onclick="nextMonth()"> Next → </button>
-     </div><button class="table-button" onclick="showTablePage()"> 📊 Table </button>
+     </div><button class="table-button" onclick="showTablePage()"> 📊 Table </button> <button class="logout-button" onclick="logout()"> 🚪 Logout </button>
     </div>
    </header>
    <div class="map-container">
@@ -1205,6 +1229,10 @@
     const rowsPerPage = 25;
     let availableMonths = [];
     let currentMonthIndex = -1; // -1 means "All Data"
+
+    function logout() {
+      window.open('/index.html', '_blank', 'noopener,noreferrer');
+    }
 
     async function onConfigChange(config) {
       const baseSize = config.font_size || defaultConfig.font_size;
@@ -1877,7 +1905,7 @@
       
       const report = `SPOT REPORT
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━���━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ACCUSED/OWNER:
   Name: ${getValue('Accused/Owner')}
@@ -2010,6 +2038,7 @@ Report Generated: ${new Date().toLocaleString('en-US', {
     window.closeReportModal = closeReportModal;
     window.copyReport = copyReport;
     window.printReport = printReport;
+    window.logout = logout;
 
     window.onclick = function(event) {
       const detailsModal = document.getElementById('detailsModal');
@@ -2133,5 +2162,5 @@ Report Generated: ${new Date().toLocaleString('en-US', {
 
     loadData();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a3700ec2269ddc7',t:'MTc2Mzk2NzM1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a3739a4e48f098a',t:'MTc2Mzk2OTY4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
