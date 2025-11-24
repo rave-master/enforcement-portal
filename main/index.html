@@ -1230,10 +1230,15 @@
     let availableMonths = [];
     let currentMonthIndex = -1; // -1 means "All Data"
 
-    function logout() {
-      // navigate the current tab to the logout page; replace() avoids adding a history entry
-      window.location.replace('/index.html');
-    }
+    // Optional: Logout button
+  function logout() {
+    signOut(auth).then(() => {
+      window.location.href = "/index.html";
+    });
+  }
+  window.logout = logout;
+
+    
 
     async function onConfigChange(config) {
       const baseSize = config.font_size || defaultConfig.font_size;
