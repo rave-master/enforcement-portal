@@ -11,6 +11,54 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
+
+<button id="logoutBtn">Logout</button>
+
+<script type="module">
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } 
+    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    // Firebase Config (same as your login page)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCriEnMvKH7tkknm-6oqBCYbxV_t0JvUa0",
+      authDomain: "data-7a39e.firebaseapp.com",
+      projectId: "data-7a39e",
+      storageBucket: "data-7a39e.firebasestorage.app",
+      messagingSenderId: "674994211689",
+      appId: "1:674994211689:web:1c66c2fce67e1fe766cbf8",
+      measurementId: "G-D5LNKTPWGD"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // 🚨 Protect Page (Only allow logged in users)
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // No user → redirect to login
+            window.location.href = "/index.html"; 
+        }
+    });
+
+    // 🚪 Logout function
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        signOut(auth)
+            .then(() => {
+                // Redirect after logout
+                window.location.href = "/index.html";
+            })
+            .catch(err => alert(err.message));
+    });
+</script>
+
+
+
+
+
+
   <style>
     body {
       box-sizing: border-box;
@@ -150,25 +198,6 @@
       background: #e57373;
       cursor: not-allowed;
       opacity: 0.6;
-    }
-
-    .logout-button {
-      background: #d32f2f;
-      color: white;
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .logout-button:hover {
-      background: #b71c1c;
-      transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     .map-container {
@@ -803,11 +832,6 @@
         justify-content: center;
       }
 
-      .logout-button {
-        width: 100%;
-        justify-content: center;
-      }
-
       .map-container {
         flex: 0 0 400px;
         min-height: 400px;
@@ -1139,7 +1163,7 @@
       <div id="currentMonth" style="color: white; font-weight: 600; font-size: 1rem; min-width: 120px; text-align: center;">
        All Data
       </div><button class="month-nav-button" onclick="nextMonth()"> Next → </button>
-     </div><button class="table-button" onclick="showTablePage()"> 📊 Table </button> <button class="logout-button" onclick="logout()"> 🚪 Logout </button>
+     </div><button class="table-button" onclick="showTablePage()"> 📊 Table </button>
     </div>
    </header>
    <div class="map-container">
@@ -1229,100 +1253,6 @@
     const rowsPerPage = 25;
     let availableMonths = [];
     let currentMonthIndex = -1; // -1 means "All Data"
-
-    // Inject a module script to initialize Firebase (modular SDK)
-    (function initFirebaseModule() {
-      try {
-      const moduleCode = `
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-analytics.js";
-        import { getAuth, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-
-        const firebaseConfig = {
-        apiKey: "AIzaSyCriEnMvKH7tkknm-6oqBCYbxV_t0JvUa0",
-        authDomain: "data-7a39e.firebaseapp.com",
-        projectId: "data-7a39e",
-        storageBucket: "data-7a39e.firebasestorage.app",
-        messagingSenderId: "674994211689",
-        appId: "1:674994211689:web:1c66c2fce67e1fe766cbf8",
-        measurementId: "G-D5LNKTPWGD"
-        };
-
-        const app = initializeApp(firebaseConfig);
-
-        let analytics = null;
-        try {
-        analytics = getAnalytics(app);
-        } catch (err) {
-        // analytics may fail in some environments (e.g., local file://)
-        analytics = null;
-        }
-
-        const auth = getAuth(app);
-
-        // expose instances and signOut to the page scope for use by existing logout()
-        window.firebaseApp = app;
-        window.firebaseAnalytics = analytics;
-        window.auth = auth;
-        window.firebaseSignOut = firebaseSignOut;
-      `;
-      const s = document.createElement('script');
-      s.type = 'module';
-      s.textContent = moduleCode;
-      document.head.appendChild(s);
-      } catch (e) {
-      console.warn('Failed to inject firebase module', e);
-      }
-    })();
-
-    // Optional: Logout button
-    function logout() {
-      // Prefer modular SDK signOut exposed on window (from injected module)
-      if (typeof window.firebaseSignOut === 'function' && typeof window.auth !== 'undefined') {
-      try {
-        window.firebaseSignOut(window.auth).then(() => {
-        window.location.href = "/index.html";
-        }).catch(() => {
-        window.location.href = "/index.html";
-        });
-        return;
-      } catch (e) {
-        // proceed to other fallbacks
-      }
-      }
-
-      // Also accept a global signOut/auth if available (legacy or other integration)
-      if (typeof signOut === 'function' && typeof auth !== 'undefined') {
-      try {
-        signOut(auth).then(() => {
-        window.location.href = "/index.html";
-        }).catch(() => {
-        window.location.href = "/index.html";
-        });
-        return;
-      } catch (e) {
-        // proceed to other fallbacks
-      }
-      }
-
-      // Try legacy Firebase namespace if available (firebase.auth().signOut())
-      if (window.firebase && typeof window.firebase.auth === 'function') {
-      try {
-        window.firebase.auth().signOut().then(() => {
-        window.location.href = "/index.html";
-        }).catch(() => {
-        window.location.href = "/index.html";
-        });
-        return;
-      } catch (e) {
-        // proceed to final fallback
-      }
-      }
-
-      // Final fallback: simply redirect the user (useful if no auth SDK is integrated)
-      window.location.href = "/index.html";
-    }
-    window.logout = logout;
 
     async function onConfigChange(config) {
       const baseSize = config.font_size || defaultConfig.font_size;
@@ -1995,7 +1925,7 @@
       
       const report = `SPOT REPORT
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━���━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ACCUSED/OWNER:
   Name: ${getValue('Accused/Owner')}
@@ -2128,7 +2058,6 @@ Report Generated: ${new Date().toLocaleString('en-US', {
     window.closeReportModal = closeReportModal;
     window.copyReport = copyReport;
     window.printReport = printReport;
-    window.logout = logout;
 
     window.onclick = function(event) {
       const detailsModal = document.getElementById('detailsModal');
@@ -2252,5 +2181,5 @@ Report Generated: ${new Date().toLocaleString('en-US', {
 
     loadData();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a3739a4e48f098a',t:'MTc2Mzk2OTY4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a37a75b04e104f0',t:'MTc2Mzk3NDE3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

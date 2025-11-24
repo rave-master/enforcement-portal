@@ -1,178 +1,239 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Animated Login Portal</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Login</title>
 
-  <!-- Optional SDK scripts referenced by your page (placeholders kept) -->
-  <script src="/_sdk/element_sdk.js" defer></script>
-  <script src="/_sdk/data_sdk.js" defer></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-  <style>
-    /* Base + replaced background (no orb animation) */
-    html, body { height: 100%; width: 100%; margin: 0; padding: 0; }
+<style>
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: url('/de.jpg') center/cover no-repeat fixed;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      overflow: hidden;
-      box-sizing: border-box;
-    }
-    * { box-sizing: border-box; }
-
-    .login-container {
-      width:100%; height:100%; display:flex; align-items:center; justify-content:center; position:relative;
-      padding: 24px;
-      background: rgba(0,0,0,0.2); /* subtle overlay so card stands out on various images */
+        margin: 0;
+        font-family: "Poppins", sans-serif;
+        background: url("/de.jpg") no-repeat center center/cover;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
-    .login-card {
-      position:relative; z-index:1; width:100%; max-width:420px; padding:28px; border-radius:16px;
-      backdrop-filter: blur(8px); background: rgba(255,255,255,0.95); box-shadow: 0 12px 40px rgba(2,6,23,0.3);
-      animation: slideIn 0.45s ease-out;
-    }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(20px);} to { opacity:1; transform: translateY(0);} }
-
-    .tabs { display:flex; gap:0; margin-bottom:18px; border-radius:10px; padding:4px; background: rgba(0,0,0,0.04); }
-    .tab { flex:1; padding:10px; font-size:14px; font-weight:600; border:none; border-radius:8px; cursor:pointer; transition:all 0.18s ease; background:transparent; color:#0f172a; }
-    .tab.active { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-
-    .logo-container { text-align:center; margin-bottom:14px; }
-    .logo { width:46px; height:46px; margin:0 auto 8px; display:block; color:#0ea5e9; }
-    .welcome-title { font-size:20px; font-weight:700; margin-bottom:6px; text-align:center; color:#0f172a; }
-    .subtitle { font-size:13px; text-align:center; opacity:0.75; color:#334155; margin-bottom:12px; }
-
-    .tab-content { display:none; }
-    .tab-content.active { display:block; animation: fadeIn 0.25s ease-in; }
-    @keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to { opacity:1; transform: translateY(0);} }
-
-    .form-group { margin-bottom:12px; }
-    label { display:block; font-size:12px; font-weight:600; margin-bottom:6px; color:#334155; }
-    .input-wrapper { position:relative; }
-
-    input[type="email"], input[type="password"], input[type="text"] {
-      width:100%; padding:10px 12px; font-size:14px; border:2px solid #cbd5e1; border-radius:8px; outline:none; transition:all 0.18s ease; background:transparent;
-      color:#0f172a;
-    }
-    input[type="email"]:focus, input[type="password"]:focus, input[type="text"]:focus {
-      box-shadow: 0 6px 18px rgba(2,6,23,0.08);
-      transform: translateY(-2px);
+    /* Modal Background */
+    .modal-bg {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
-    .password-toggle { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:18px; opacity:0.7; padding:4px; }
-    .forgot-password { text-align:right; margin-top:8px; }
-    .forgot-password a { font-size:13px; text-decoration:none; font-weight:600; color:#0ea5e9; }
-
-    .signin-btn { width:100%; padding:11px; font-size:14px; font-weight:700; border:none; border-radius:8px; cursor:pointer; transition:all 0.18s ease; margin-top:12px; font-family:inherit; background:#10b981; color:#fff; }
-    .signin-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(16,185,129,0.18); }
-
-    .divider { display:flex; align-items:center; margin:14px 0; opacity:0.7; color:#475569; }
-    .divider::before, .divider::after { content:''; flex:1; height:1px; background:#e6eef8; }
-    .divider span { padding:0 10px; font-size:12px; }
-
-    .google-btn { width:100%; padding:10px; font-size:13px; font-weight:600; border:2px solid #94a3b8; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; background:#fff; color:#0f172a; }
-    .google-icon { width:18px; height:18px; }
-
-    .signup-prompt { text-align:center; margin-top:14px; font-size:13px; color:#475569; }
-    .success-message { position: fixed; top: 18px; right: 18px; padding: 12px 18px; border-radius: 10px; font-weight:700; z-index:10000; animation: slideInRight 0.3s ease-out; background:#10b981; color:#fff; box-shadow:0 8px 26px rgba(16,185,129,0.18); }
-    @keyframes slideInRight { from { transform: translateX(40%); opacity:0; } to { transform: translateX(0); opacity:1; } }
-
-    /* Responsive */
-    @media (max-width:520px) {
-      .login-card { padding:20px; border-radius:12px; }
+    /* Clean Modern Card */
+    .card {
+        width: 360px;
+        background: #ffffff;
+        padding: 32px;
+        border-radius: 16px;
+        animation: fadeIn 0.5s ease;
+        text-align: center;
     }
-  </style>
 
-  <style>@view-transition { navigation: auto; }</style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
-  <!-- Tailwind CDN (optional) -->
-  <script src="https://cdn.tailwindcss.com" defer></script>
+    .logo {
+        width: 90px;
+        display: block;
+        margin: 0 auto 10px auto;
+        border-radius: 8px;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-weight: 600;
+        color: #222;
+    }
+
+    /* Centered Input Group */
+    .input-group {
+        margin-bottom: 18px;
+        width: 100%;
+        position: relative;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px 42px 12px 12px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        font-size: 15px;
+        outline: none;
+        transition: 0.2s;
+        box-sizing: border-box;
+    }
+
+    input:focus {
+        border-color: #6d28d9;
+    }
+
+    /* Password eye button */
+    .toggle-pass {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-size: 18px;
+        color: #555;
+        user-select: none;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 500;
+        transition: 0.2s;
+    }
+
+    .btn-primary {
+        background: #6d28d9;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #5b21b6;
+    }
+
+    .google-btn {
+        margin-top: 10px;
+        background: #fff;
+        border: 2px solid #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .links {
+        margin-top: 15px;
+        font-size: 14px;
+    }
+
+    .links a {
+        color: #6d28d9;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .links a:hover {
+        text-decoration: underline;
+    }
+
+    /* LOADING OVERLAY */
+    #loadingScreen {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.65);
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loader {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #fff;
+        border-top: 5px solid #6d28d9;
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
 </head>
 
 <body>
-  <div class="login-container">
-    <div class="login-card" id="login-card">
-      <div class="logo-container">
-        <svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" stroke-width="3"/><path d="M32 12 L32 32 L45 32" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="32" cy="32" r="3" fill="currentColor"/></svg>
-        <h1 class="welcome-title" id="welcome-title">Welcome back</h1>
-        <p class="subtitle" id="subtitle">Enter your credentials to continue</p>
-      </div>
 
-      <div class="tabs">
-        <button class="tab active" id="signin-tab">Sign In</button>
-        <button class="tab" id="signup-tab">Sign Up</button>
-      </div>
+<!-- Loading -->
+<div id="loadingScreen"><div class="loader"></div></div>
 
-      <div class="tab-content active" id="signin-content">
-        <form id="login-form">
-          <div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email" placeholder="you@example.com" required></div>
+<!-- LOGIN MODAL -->
+<div class="modal-bg" id="loginModal">
+    <div class="card">
+        <img src="/2x2.gif" class="logo">
+        <h2>Login</h2>
 
-          <div class="form-group"><label for="password">Password</label>
-            <div class="input-wrapper">
-              <input type="password" id="password" name="password" placeholder="Enter your password" required>
-              <button type="button" class="password-toggle" id="password-toggle" aria-label="Toggle password visibility">👁️</button>
-            </div>
-            <div class="forgot-password"><a href="#" id="forgot-password-link">Forgot password?</a></div>
-          </div>
+        <div class="input-group">
+            <input type="email" id="loginEmail" placeholder="Email">
+        </div>
 
-          <button type="submit" class="signin-btn" id="signin-btn">Sign In</button>
-        </form>
+        <div class="input-group">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <span class="toggle-pass" onclick="togglePassword('loginPassword', this)">👁️</span>
+        </div>
 
-        <div class="divider"><span>OR</span></div>
+        <button class="btn btn-primary" onclick="loginUser()">Login</button>
 
-        <button type="button" class="google-btn" id="google-btn">
-          <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          <span id="google-btn-text">Continue with Google</span>
+        <button class="btn google-btn" onclick="googleLogin()">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+            Sign in with Google
         </button>
-      </div>
 
-      <div class="tab-content" id="signup-content">
-        <form id="signup-form">
-          <div class="form-group"><label for="signup-name">Full Name</label><input type="text" id="signup-name" name="name" placeholder="Enter your name" required></div>
-          <div class="form-group"><label for="signup-email">Email</label><input type="email" id="signup-email" name="email" placeholder="you@example.com" required></div>
-          <div class="form-group"><label for="signup-password">Password</label>
-            <div class="input-wrapper"><input type="password" id="signup-password" name="password" placeholder="Create a password" required><button type="button" class="password-toggle" id="signup-password-toggle" aria-label="Toggle password visibility">👁️</button></div>
-          </div>
-          <button type="submit" class="signin-btn" id="signup-btn">Create Account</button>
-        </form>
-
-        <div class="divider"><span>OR</span></div>
-        <button type="button" class="google-btn" id="google-signup-btn">
-          <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          <span id="google-signup-btn-text">Sign up with Google</span>
-        </button>
-      </div>
-
+        <div class="links">
+            <a onclick="forgotPassword()">Forgot Password?</a><br>
+            <a onclick="openSignup()">Create an Account</a>
+        </div>
     </div>
-  </div>
+</div>
 
-  <!-- Firebase + App logic (module) -->
-  <script type="module">
-    // --- Firebase CDN module imports (App, Auth, Firestore) ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js";
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword,
-      sendPasswordResetEmail,
-      GoogleAuthProvider,
-      signInWithPopup,
-      onAuthStateChanged,
-      updateProfile
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      setDoc,
-      getDoc,
-      updateDoc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+<!-- SIGNUP MODAL -->
+<div class="modal-bg" id="signupModal" style="display:none;">
+    <div class="card">
+        <img src="/2x2.gif" class="logo">
+        <h2>Sign Up</h2>
 
-    // --- Your firebase config (already provided) ---
+        <div class="input-group">
+            <input type="email" id="signupEmail" placeholder="Email">
+        </div>
+
+        <div class="input-group">
+            <input type="password" id="signupPassword" placeholder="Password">
+            <span class="toggle-pass" onclick="togglePassword('signupPassword', this)">👁️</span>
+        </div>
+
+        <button class="btn btn-primary" onclick="signupUser()">Create Account</button>
+
+        <div class="links">
+            <a onclick="closeSignup()">Back to Login</a>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+    import {
+        getAuth,
+        signInWithEmailAndPassword,
+        createUserWithEmailAndPassword,
+        sendPasswordResetEmail,
+        GoogleAuthProvider,
+        signInWithPopup
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyCriEnMvKH7tkknm-6oqBCYbxV_t0JvUa0",
       authDomain: "data-7a39e.firebaseapp.com",
@@ -183,243 +244,79 @@
       measurementId: "G-D5LNKTPWGD"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    try { getAnalytics(app); } catch (e) { /* analytics may require secure origin - ignore if unavailable */ }
+    const analytics = getAnalytics(app);
     const auth = getAuth(app);
-    const db = getFirestore(app);
-    const googleProvider = new GoogleAuthProvider();
 
-    // --- DOM refs ---
-    const signinTab = document.getElementById('signin-tab');
-    const signupTab = document.getElementById('signup-tab');
-    const signinContent = document.getElementById('signin-content');
-    const signupContent = document.getElementById('signup-content');
+    function showLoader(){ loadingScreen.style.display="flex"; }
+    function hideLoader(){ loadingScreen.style.display="none"; }
 
-    const passwordToggle = document.getElementById('password-toggle');
-    const passwordInput = document.getElementById('password');
-    const signupPasswordToggle = document.getElementById('signup-password-toggle');
-    const signupPasswordInput = document.getElementById('signup-password');
-
-    const loginForm = document.getElementById('login-form');
-    const signupForm = document.getElementById('signup-form');
-
-    const googleBtn = document.getElementById('google-btn');
-    const googleSignupBtn = document.getElementById('google-signup-btn');
-    const forgotPasswordLink = document.getElementById('forgot-password-link');
-
-    // --- Simple visual helper (keeps your style) ---
-    function showSuccessMessage(message, { color } = {}) {
-      const existingMessage = document.querySelector('.success-message');
-      if (existingMessage) existingMessage.remove();
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'success-message';
-      messageDiv.textContent = message;
-      messageDiv.style.backgroundColor = color || '#10b981';
-      messageDiv.style.color = '#ffffff';
-      document.body.appendChild(messageDiv);
-      setTimeout(() => { messageDiv.remove(); }, 3000);
-    }
-
-    // --- elementSdk & style config (keeps previous behavior) ---
-    const defaultConfig = {
-      background_color: '#0EA5E9',
-      card_background: 'rgba(255,255,255,0.95)',
-      text_color: '#1e293b',
-      primary_action: '#10b981',
-      secondary_action: '#64748b',
-      welcome_title: 'Welcome back',
-      subtitle_text: 'Enter your credentials to continue',
-      font_family: 'Inter',
-      font_size: 16
+    // Toggle show/hide password
+    window.togglePassword = function(id, elem){
+        const input = document.getElementById(id);
+        if(input.type === "password"){
+            input.type = "text";
+            elem.textContent = "🙈";
+        } else {
+            input.type = "password";
+            elem.textContent = "👁️";
+        }
     };
 
-    function applyConfig(config = {}) {
-      const cfg = { ...defaultConfig, ...config };
-      document.getElementById('welcome-title').textContent = cfg.welcome_title;
-      document.getElementById('subtitle').textContent = cfg.subtitle_text;
-      // inputs / buttons
-      const signinBtn = document.getElementById('signin-btn');
-      const signupBtn = document.getElementById('signup-btn');
-      signinBtn.style.backgroundColor = cfg.primary_action;
-      signupBtn.style.backgroundColor = cfg.primary_action;
-      document.querySelectorAll('input').forEach(i => i.style.borderColor = cfg.secondary_action);
-    }
-    if (window.elementSdk) {
-      window.elementSdk.init({ defaultConfig, onConfigChange: applyConfig, mapToCapabilities: () => ({}), mapToEditPanelValues: () => new Map() });
-    } else {
-      applyConfig();
-    }
+    // LOGIN
+    window.loginUser = function () {
+        showLoader();
+        signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value)
+            .then(() => {
+                hideLoader();
+                window.location.href = "/main/index.html";
+            })
+            .catch(e => { hideLoader(); alert(e.message); });
+    };
 
-    // --- Tab switching ---
-    signinTab.addEventListener('click', () => {
-      signinTab.classList.add('active'); signupTab.classList.remove('active');
-      signinContent.classList.add('active'); signupContent.classList.remove('active');
-    });
-    signupTab.addEventListener('click', () => {
-      signupTab.classList.add('active'); signinTab.classList.remove('active');
-      signupContent.classList.add('active'); signinContent.classList.remove('active');
-    });
+    // GOOGLE LOGIN
+    window.googleLogin = function () {
+        showLoader();
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider)
+            .then(() => {
+                hideLoader();
+                window.location.href = "/main/index.html";
+            })
+            .catch(e => { hideLoader(); alert(e.message); });
+    };
 
-    // --- Password toggle ---
-    passwordToggle?.addEventListener('click', () => {
-      const type = passwordInput.type === 'password' ? 'text' : 'password';
-      passwordInput.type = type;
-      passwordToggle.textContent = type === 'password' ? '👁️' : '🙈';
-    });
-    signupPasswordToggle?.addEventListener('click', () => {
-      const type = signupPasswordInput.type === 'password' ? 'text' : 'password';
-      signupPasswordInput.type = type;
-      signupPasswordToggle.textContent = type === 'password' ? '👁️' : '🙈';
-    });
+    // SIGNUP
+    window.signupUser = function () {
+        showLoader();
+        createUserWithEmailAndPassword(auth, signupEmail.value, signupPassword.value)
+            .then(() => {
+                hideLoader();
+                alert("Account created!");
+                closeSignup();
+            })
+            .catch(e => { hideLoader(); alert(e.message); });
+    };
 
-    // --- Firestore: create or update user doc at users/{uid} ---
-    async function createOrUpdateUserDoc(user, provider = 'password') {
-      if (!user || !user.uid) return;
-      const userRef = doc(db, 'users', user.uid);
-      try {
-        const snap = await getDoc(userRef);
-        const now = serverTimestamp();
-        const base = {
-          uid: user.uid || null,
-          name: user.displayName || null,
-          email: user.email || null,
-          provider: provider,
-          photoURL: user.photoURL || null
-        };
-        if (!snap.exists()) {
-          // create
-          await setDoc(userRef, {
-            ...base,
-            createdAt: now,
-            lastLogin: now
-          });
-        } else {
-          // update lastLogin and merge name/photo if missing
-          const updates = { lastLogin: now };
-          if (!snap.data().name && base.name) updates.name = base.name;
-          if (!snap.data().photoURL && base.photoURL) updates.photoURL = base.photoURL;
-          await updateDoc(userRef, updates);
-        }
-      } catch (err) {
-        console.error('Firestore user write error:', err);
-      }
-    }
+    // FORGOT PASSWORD
+    window.forgotPassword = function () {
+        const email = prompt("Enter your email:");
+        if (!email) return;
+        sendPasswordResetEmail(auth, email)
+            .then(() => alert("Password reset sent!"))
+            .catch(e => alert(e.message));
+    };
 
-    // --- Redirect helper ---
-    function finishSignInAndRedirect(user) {
-      // create or update user doc, then redirect
-      createOrUpdateUserDoc(user, user.providerData?.[0]?.providerId || 'password')
-        .finally(() => {
-          // redirect to main/index.html (login page is /index.html)
-          window.location.href = 'main/index.html';
-        });
-    }
+    // Switch Modals
+    window.openSignup = function () {
+        loginModal.style.display = "none";
+        signupModal.style.display = "flex";
+    };
+    window.closeSignup = function () {
+        signupModal.style.display = "none";
+        loginModal.style.display = "flex";
+    };
+</script>
 
-    // --- AUTH: Login flow (Email/Password) ---
-    loginForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      try {
-        const credential = await signInWithEmailAndPassword(auth, email, password);
-        const user = credential.user;
-        showSuccessMessage(`Signed in as ${user.email}`);
-        // update lastLogin and redirect
-        await createOrUpdateUserDoc(user, 'password');
-        // small delay so user can see message (optional)
-        setTimeout(() => { window.location.href = 'main/index.html'; }, 450);
-      } catch (error) {
-        showSuccessMessage(error.message || 'Sign-in failed');
-      }
-    });
-
-    // --- AUTH: Google sign-in (Sign In panel) ---
-    googleBtn?.addEventListener('click', async () => {
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
-        showSuccessMessage(`Signed in as ${user.email}`);
-        // create or update user doc then redirect
-        finishSignInAndRedirect(user);
-      } catch (error) {
-        showSuccessMessage(error.message || 'Google sign-in failed');
-      }
-    });
-
-    // --- AUTH: Forgot password ---
-    forgotPasswordLink?.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      if (!email) return showSuccessMessage('Please enter your email in the Email field above.');
-      try {
-        await sendPasswordResetEmail(auth, email);
-        showSuccessMessage('Password reset link sent to your email');
-      } catch (error) {
-        showSuccessMessage(error.message || 'Failed to send reset email');
-      }
-    });
-
-    // --- AUTH: Sign up (Email/Password) ---
-    signupForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('signup-name').value;
-      const email = document.getElementById('signup-email').value;
-      const password = document.getElementById('signup-password').value;
-      try {
-        const credential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = credential.user;
-        // set displayName in Firebase Auth profile (optional)
-        if (name) {
-          try { await updateProfile(user, { displayName: name }); } catch (err) { console.warn('updateProfile failed', err); }
-        }
-        // create user doc in Firestore and redirect
-        showSuccessMessage(`Account created for ${name || user.email}`);
-        await createOrUpdateUserDoc(user, 'password');
-        // small delay then redirect
-        setTimeout(() => { window.location.href = 'main/index.html'; }, 500);
-      } catch (error) {
-        showSuccessMessage(error.message || 'Sign-up failed');
-      }
-    });
-
-    // --- AUTH: Google sign-up (same popup used for sign-up) ---
-    googleSignupBtn?.addEventListener('click', async () => {
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
-        showSuccessMessage(`Signed in as ${user.email}`);
-        finishSignInAndRedirect(user);
-      } catch (error) {
-        showSuccessMessage(error.message || 'Google sign-up failed');
-      }
-    });
-
-    // --- Auth state observer: if user already signed-in, redirect immediately ---
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // If already signed-in and on index.html, redirect to main
-        // This avoids showing login to already-authenticated users.
-        try {
-          // ensure Firestore is updated
-          await createOrUpdateUserDoc(user, user.providerData?.[0]?.providerId || 'password');
-        } catch (e) { /* ignore */ }
-        // If current page is index.html, redirect
-        const currentPath = window.location.pathname.replace(/\/$/, '');
-        if (currentPath === '/index.html' || currentPath === '') {
-          // short timeout so page finishes rendering
-          setTimeout(() => { window.location.href = 'main/index.html'; }, 250);
-        }
-      } else {
-        // signed out
-        console.log('User signed out');
-      }
-    });
-
-    // Note: If Google sign-in popup complains about origin, add your domain (or 'localhost') in Firebase Console -> Authentication -> Authorized domains.
-  </script>
-
-  <!-- Cloudflare challenge iframe script from your original file (kept as-is) -->
-  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a3592b6374be2f0',t:'MTc2Mzk1MjM1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
