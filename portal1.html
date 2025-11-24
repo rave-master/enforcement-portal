@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animated Login Portal</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    .login-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .background-animation {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.6;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .orb-1 {
+      width: 500px;
+      height: 500px;
+      top: -10%;
+      left: -5%;
+      animation-delay: 0s;
+    }
+
+    .orb-2 {
+      width: 400px;
+      height: 400px;
+      bottom: -10%;
+      right: -5%;
+      animation-delay: 7s;
+    }
+
+    .orb-3 {
+      width: 350px;
+      height: 350px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: 14s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translate(0, 0) scale(1);
+      }
+      33% {
+        transform: translate(30px, -50px) scale(1.1);
+      }
+      66% {
+        transform: translate(-20px, 20px) scale(0.9);
+      }
+    }
+
+    .login-card {
+      position: relative;
+      z-index: 1;
+      width: 90%;
+      max-width: 380px;
+      padding: 28px;
+      border-radius: 16px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      animation: slideIn 0.6s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      border-radius: 10px;
+      padding: 4px;
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: transparent;
+    }
+
+    .tab.active {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 10px;
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    .welcome-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      text-align: center;
+      opacity: 0.7;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.4s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 13px;
+      border: 2px solid;
+      border-radius: 8px;
+      outline: none;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    input:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+      padding: 4px;
+    }
+
+    .password-toggle:hover {
+      opacity: 1;
+    }
+
+    .forgot-password {
+      text-align: right;
+      margin-top: 8px;
+    }
+
+    .forgot-password a {
+      font-size: 13px;
+      text-decoration: none;
+      font-weight: 500;
+      transition: opacity 0.3s ease;
+    }
+
+    .forgot-password a:hover {
+      opacity: 0.8;
+    }
+
+    .signin-btn {
+      width: 100%;
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 16px;
+      font-family: inherit;
+    }
+
+    .signin-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .signin-btn:active {
+      transform: translateY(0);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 16px 0;
+      opacity: 0.5;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+    }
+
+    .divider span {
+      padding: 0 10px;
+      font-size: 11px;
+    }
+
+    .google-btn {
+      width: 100%;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 2px solid;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    .google-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .google-icon {
+      width: 18px;
+      height: 18px;
+    }
+
+    .signup-prompt {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 12px;
+    }
+
+    .signup-prompt a {
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .signup-prompt a:hover {
+      opacity: 0.8;
+    }
+
+    .success-message {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      z-index: 1000;
+      animation: slideInRight 0.4s ease-out;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="login-container">
+   <div class="background-animation">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+   </div>
+   <div class="login-card">
+    <div class="logo-container">
+     <svg class="logo" viewbox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" stroke-width="3" /> <path d="M32 12 L32 32 L45 32" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" /> <circle cx="32" cy="32" r="3" fill="currentColor" />
+     </svg>
+     <h1 class="welcome-title" id="welcome-title">Welcome back</h1>
+     <p class="subtitle" id="subtitle">Enter your credentials to continue</p>
+    </div>
+    <div class="tabs"><button class="tab active" id="signin-tab">Sign In</button> <button class="tab" id="signup-tab">Sign Up</button>
+    </div>
+    <div class="tab-content active" id="signin-content">
+     <form id="login-form">
+      <div class="form-group"><label for="email">Email</label> <input type="email" id="email" name="email" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group"><label for="password">Password</label>
+       <div class="input-wrapper"><input type="password" id="password" name="password" placeholder="Enter your password" required> <button type="button" class="password-toggle" id="password-toggle" aria-label="Toggle password visibility"> 👁️ </button>
+       </div>
+       <div class="forgot-password"><a href="#" id="forgot-password-link">Forgot password?</a>
+       </div>
+      </div><button type="submit" class="signin-btn" id="signin-btn">Sign In</button>
+     </form>
+     <div class="divider"><span>OR</span>
+     </div><button type="button" class="google-btn" id="google-btn">
+      <svg class="google-icon" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" /> <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" /> <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" /> <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+      </svg><span id="google-btn-text">Continue with Google</span> </button>
+    </div>
+    <div class="tab-content" id="signup-content">
+     <form id="signup-form">
+      <div class="form-group"><label for="signup-name">Full Name</label> <input type="text" id="signup-name" name="name" placeholder="Enter your name" required>
+      </div>
+      <div class="form-group"><label for="signup-email">Email</label> <input type="email" id="signup-email" name="email" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group"><label for="signup-password">Password</label>
+       <div class="input-wrapper"><input type="password" id="signup-password" name="password" placeholder="Create a password" required> <button type="button" class="password-toggle" id="signup-password-toggle" aria-label="Toggle password visibility"> 👁️ </button>
+       </div>
+      </div><button type="submit" class="signin-btn" id="signup-btn">Create Account</button>
+     </form>
+     <div class="divider"><span>OR</span>
+     </div><button type="button" class="google-btn" id="google-signup-btn">
+      <svg class="google-icon" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" /> <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" /> <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" /> <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+      </svg><span id="google-signup-btn-text">Sign up with Google</span> </button>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      background_color: '#0EA5E9',
+      card_background: '#ffffff',
+      text_color: '#1e293b',
+      primary_action: '#10b981',
+      secondary_action: '#64748b',
+      orb_1_color: '#0EA5E9',
+      orb_2_color: '#10b981',
+      orb_3_color: '#06b6d4',
+      welcome_title: 'Welcome back',
+      subtitle_text: 'Enter your credentials to continue',
+      signin_button: 'Sign In',
+      google_button: 'Continue with Google',
+      forgot_password_link: 'Forgot password?',
+      signup_prompt: "Don't have an account? ",
+      font_family: 'Inter',
+      font_size: 16
+    };
+
+    async function onConfigChange(config) {
+      const bgColor = config.background_color || defaultConfig.background_color;
+      const cardBg = config.card_background || defaultConfig.card_background;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_action || defaultConfig.primary_action;
+      const secondaryColor = config.secondary_action || defaultConfig.secondary_action;
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      // Apply background color
+      document.body.style.backgroundColor = bgColor;
+      
+      // Apply orb colors
+      document.querySelector('.orb-1').style.backgroundColor = config.orb_1_color || defaultConfig.orb_1_color;
+      document.querySelector('.orb-2').style.backgroundColor = config.orb_2_color || defaultConfig.orb_2_color;
+      document.querySelector('.orb-3').style.backgroundColor = config.orb_3_color || defaultConfig.orb_3_color;
+      
+      // Apply card styling
+      const card = document.querySelector('.login-card');
+      card.style.backgroundColor = cardBg;
+      
+      // Apply text colors
+      const fontStack = `${customFont}, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+      document.body.style.fontFamily = fontStack;
+      
+      document.querySelector('.welcome-title').style.color = textColor;
+      document.querySelector('.welcome-title').style.fontSize = `${baseSize * 1.75}px`;
+      
+      document.querySelector('.subtitle').style.color = textColor;
+      document.querySelector('.subtitle').style.fontSize = `${baseSize * 0.9375}px`;
+      
+      const labels = document.querySelectorAll('label');
+      labels.forEach(label => {
+        label.style.color = textColor;
+        label.style.fontSize = `${baseSize * 0.875}px`;
+      });
+      
+      // Apply input styling
+      const inputs = document.querySelectorAll('input[type="email"], input[type="password"], input[type="text"]');
+      inputs.forEach(input => {
+        input.style.borderColor = secondaryColor;
+        input.style.color = textColor;
+        input.style.backgroundColor = cardBg;
+        input.style.fontSize = `${baseSize * 0.9375}px`;
+      });
+      
+      // Apply tab styling
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.style.color = textColor;
+        tab.style.fontSize = `${baseSize * 0.875}px`;
+      });
+      
+      const activeTab = document.querySelector('.tab.active');
+      if (activeTab) {
+        activeTab.style.backgroundColor = cardBg;
+        activeTab.style.color = primaryColor;
+      }
+      
+      // Apply button styling
+      const signinBtn = document.getElementById('signin-btn');
+      signinBtn.style.backgroundColor = primaryColor;
+      signinBtn.style.color = '#ffffff';
+      signinBtn.style.fontSize = `${baseSize}px`;
+      
+      const signupBtn = document.getElementById('signup-btn');
+      signupBtn.style.backgroundColor = primaryColor;
+      signupBtn.style.color = '#ffffff';
+      signupBtn.style.fontSize = `${baseSize}px`;
+      
+      const googleBtns = document.querySelectorAll('.google-btn');
+      googleBtns.forEach(btn => {
+        btn.style.backgroundColor = cardBg;
+        btn.style.borderColor = secondaryColor;
+        btn.style.color = textColor;
+        btn.style.fontSize = `${baseSize * 0.9375}px`;
+      });
+      
+      // Apply link colors
+      const forgotLink = document.querySelector('.forgot-password a');
+      forgotLink.style.color = primaryColor;
+      forgotLink.style.fontSize = `${baseSize * 0.8125}px`;
+      
+      const signupLink = document.getElementById('signup-link');
+      signupLink.style.color = primaryColor;
+      
+      const signupPromptText = document.querySelector('.signup-prompt');
+      signupPromptText.style.color = textColor;
+      signupPromptText.style.fontSize = `${baseSize * 0.875}px`;
+      
+      // Apply divider color
+      const divider = document.querySelector('.divider');
+      divider.style.color = textColor;
+      const dividerSpan = divider.querySelector('span');
+      dividerSpan.style.fontSize = `${baseSize * 0.8125}px`;
+      divider.querySelectorAll('::before, ::after').forEach(el => {
+        el.style.backgroundColor = secondaryColor;
+      });
+      const style = document.createElement('style');
+      style.textContent = `
+        .divider::before, .divider::after {
+          background-color: ${secondaryColor} !important;
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Apply logo color
+      const logo = document.querySelector('.logo');
+      logo.style.color = primaryColor;
+      
+      // Update text content
+      document.getElementById('welcome-title').textContent = config.welcome_title || defaultConfig.welcome_title;
+      document.getElementById('subtitle').textContent = config.subtitle_text || defaultConfig.subtitle_text;
+      document.getElementById('signin-btn').textContent = config.signin_button || defaultConfig.signin_button;
+      document.getElementById('google-btn-text').textContent = config.google_button || defaultConfig.google_button;
+      document.getElementById('forgot-password-link').textContent = config.forgot_password_link || defaultConfig.forgot_password_link;
+      document.getElementById('signup-prompt').textContent = config.signup_prompt || defaultConfig.signup_prompt;
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              window.elementSdk.setConfig({ background_color: value });
+            }
+          },
+          {
+            get: () => config.card_background || defaultConfig.card_background,
+            set: (value) => {
+              config.card_background = value;
+              window.elementSdk.setConfig({ card_background: value });
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => config.primary_action || defaultConfig.primary_action,
+            set: (value) => {
+              config.primary_action = value;
+              window.elementSdk.setConfig({ primary_action: value });
+            }
+          },
+          {
+            get: () => config.secondary_action || defaultConfig.secondary_action,
+            set: (value) => {
+              config.secondary_action = value;
+              window.elementSdk.setConfig({ secondary_action: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (value) => {
+            config.font_family = value;
+            window.elementSdk.setConfig({ font_family: value });
+          }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (value) => {
+            config.font_size = value;
+            window.elementSdk.setConfig({ font_size: value });
+          }
+        }
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ['welcome_title', config.welcome_title || defaultConfig.welcome_title],
+        ['subtitle_text', config.subtitle_text || defaultConfig.subtitle_text],
+        ['signin_button', config.signin_button || defaultConfig.signin_button],
+        ['google_button', config.google_button || defaultConfig.google_button],
+        ['forgot_password_link', config.forgot_password_link || defaultConfig.forgot_password_link],
+        ['signup_prompt', config.signup_prompt || defaultConfig.signup_prompt]
+      ]);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    // Tab switching functionality
+    const signinTab = document.getElementById('signin-tab');
+    const signupTab = document.getElementById('signup-tab');
+    const signinContent = document.getElementById('signin-content');
+    const signupContent = document.getElementById('signup-content');
+    
+    signinTab.addEventListener('click', () => {
+      signinTab.classList.add('active');
+      signupTab.classList.remove('active');
+      signinContent.classList.add('active');
+      signupContent.classList.remove('active');
+      
+      const config = window.elementSdk?.config || defaultConfig;
+      signinTab.style.backgroundColor = config.card_background || defaultConfig.card_background;
+      signinTab.style.color = config.primary_action || defaultConfig.primary_action;
+      signupTab.style.backgroundColor = 'transparent';
+      signupTab.style.color = config.text_color || defaultConfig.text_color;
+    });
+    
+    signupTab.addEventListener('click', () => {
+      signupTab.classList.add('active');
+      signinTab.classList.remove('active');
+      signupContent.classList.add('active');
+      signinContent.classList.remove('active');
+      
+      const config = window.elementSdk?.config || defaultConfig;
+      signupTab.style.backgroundColor = config.card_background || defaultConfig.card_background;
+      signupTab.style.color = config.primary_action || defaultConfig.primary_action;
+      signinTab.style.backgroundColor = 'transparent';
+      signinTab.style.color = config.text_color || defaultConfig.text_color;
+    });
+
+    // Password toggle functionality
+    const passwordToggle = document.getElementById('password-toggle');
+    const passwordInput = document.getElementById('password');
+    
+    passwordToggle.addEventListener('click', () => {
+      const type = passwordInput.type === 'password' ? 'text' : 'password';
+      passwordInput.type = type;
+      passwordToggle.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+
+    const signupPasswordToggle = document.getElementById('signup-password-toggle');
+    const signupPasswordInput = document.getElementById('signup-password');
+    
+    signupPasswordToggle.addEventListener('click', () => {
+      const type = signupPasswordInput.type === 'password' ? 'text' : 'password';
+      signupPasswordInput.type = type;
+      signupPasswordToggle.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+
+    // Form submission
+    const loginForm = document.getElementById('login-form');
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      showSuccessMessage(`Signed in as ${email}`);
+      
+      setTimeout(() => {
+        loginForm.reset();
+      }, 1500);
+    });
+
+    // Google sign in
+    const googleBtn = document.getElementById('google-btn');
+    googleBtn.addEventListener('click', () => {
+      showSuccessMessage('Redirecting to Google Sign In...');
+    });
+
+    // Forgot password
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    forgotPasswordLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showSuccessMessage('Password reset link sent to your email');
+    });
+
+    // Signup form submission
+    const signupForm = document.getElementById('signup-form');
+    signupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('signup-name').value;
+      const email = document.getElementById('signup-email').value;
+      
+      showSuccessMessage(`Account created for ${name}!`);
+      
+      setTimeout(() => {
+        signupForm.reset();
+      }, 1500);
+    });
+
+    // Google sign up
+    const googleSignupBtn = document.getElementById('google-signup-btn');
+    googleSignupBtn.addEventListener('click', () => {
+      showSuccessMessage('Redirecting to Google Sign Up...');
+    });
+
+    function showSuccessMessage(message) {
+      const existingMessage = document.querySelector('.success-message');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'success-message';
+      messageDiv.textContent = message;
+      messageDiv.style.backgroundColor = window.elementSdk?.config?.primary_action || defaultConfig.primary_action;
+      messageDiv.style.color = '#ffffff';
+      
+      document.body.appendChild(messageDiv);
+      
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 3000);
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a3592b6374be2f0',t:'MTc2Mzk1MjM1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
