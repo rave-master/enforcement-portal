@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DENR 11 Seized Conveyances Dashboard</title>
-  <link rel="icon" href="https://ia601205.us.archive.org/12/items/icon_20250717/icon.png" type="image/png">
-
   <script src="/_sdk/element_sdk.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -1588,19 +1586,30 @@
           keys.map(key => {
             let value = row[key] || '';
             
-            // Format timestamp to 12-hour format
-            if (key.toLowerCase().includes('timestamp') && value) {
+            // Format date fields
+            if ((key.toLowerCase().includes('date') || key.toLowerCase().includes('timestamp')) && value) {
               const date = new Date(value);
               if (!isNaN(date.getTime())) {
-                const options = {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: '2-digit',
-                  hour12: true
-                };
-                value = date.toLocaleString('en-US', options);
+                // For Date of Apprehension and other date fields, use "Nov 20, 2025" format
+                if (key.toLowerCase().includes('date')) {
+                  const options = {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                  };
+                  value = date.toLocaleDateString('en-US', options);
+                } else {
+                  // For timestamp fields, include time
+                  const options = {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                  };
+                  value = date.toLocaleString('en-US', options);
+                }
               }
             }
             
@@ -1733,14 +1742,13 @@
       const monthSet = new Set();
       
       data.forEach(row => {
-        // Look for date fields
-        const dateFields = Object.keys(row).filter(key => 
-          key.toLowerCase().includes('date') || 
-          key.toLowerCase().includes('timestamp')
+        // Focus only on "Date of Apprehension"
+        const dateField = Object.keys(row).find(key => 
+          key.toLowerCase() === 'date of apprehension'
         );
         
-        dateFields.forEach(field => {
-          const value = row[field];
+        if (dateField) {
+          const value = row[dateField];
           if (value) {
             const date = new Date(value);
             if (!isNaN(date.getTime())) {
@@ -1748,7 +1756,7 @@
               monthSet.add(monthKey);
             }
           }
-        });
+        }
       });
       
       return Array.from(monthSet).sort().reverse(); // Most recent first
@@ -1762,21 +1770,21 @@
       const [year, month] = monthKey.split('-').map(Number);
       
       return allData.filter(row => {
-        const dateFields = Object.keys(row).filter(key => 
-          key.toLowerCase().includes('date') || 
-          key.toLowerCase().includes('timestamp')
+        // Focus only on "Date of Apprehension"
+        const dateField = Object.keys(row).find(key => 
+          key.toLowerCase() === 'date of apprehension'
         );
         
-        return dateFields.some(field => {
-          const value = row[field];
+        if (dateField) {
+          const value = row[dateField];
           if (value) {
             const date = new Date(value);
             if (!isNaN(date.getTime())) {
               return date.getFullYear() === year && date.getMonth() + 1 === month;
             }
           }
-          return false;
-        });
+        }
+        return false;
       });
     }
 
@@ -1827,13 +1835,6 @@
         applyMonthFilter();
       }
     };
-   
-    
-
-
-
-
-
 
     function formatPhotoLinks(value, key) {
       if (!value) return 'N/A';
@@ -1876,7 +1877,7 @@
       
       const report = `SPOT REPORT
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━���━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ACCUSED/OWNER:
   Name: ${getValue('Accused/Owner')}
@@ -2132,19 +2133,5 @@ Report Generated: ${new Date().toLocaleString('en-US', {
 
     loadData();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a2f257b85f9fee1',t:'MTc2Mzg4NDk2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();
-
- </script>
- 
- <script>
-  document.addEventListener("contextmenu", e => e.preventDefault());
-  document.onkeydown = function(e) {
-    if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && e.keyCode === 'I'.charCodeAt(0))) {
-      return false;
-    }
-  };
-</script>
-
-
-</body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a3700ec2269ddc7',t:'MTc2Mzk2NzM1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
