@@ -1117,12 +1117,6 @@
       </div><button class="month-nav-button" onclick="nextMonth()"> Next → </button>
      </div><button class="table-button" onclick="showTablePage()"> 📊 Table </button>
     </div>
-    <button class="table-button" style="background: #d32f2f; color: white;" onclick="logout()">Logout</button>
-  </div>
-</div>
-
-
-
    </header>
    <div class="map-container">
     <div id="map"></div>
@@ -1190,13 +1184,6 @@
    </div>
   </div>
   <script>
-
-function logout() {
-  // Clear session/local storage or authentication token
-  localStorage.removeItem('userToken'); // example
-  // Redirect to login page
-  window.location.href = '/index.html';
-}
     const defaultConfig = {
       dashboard_title: "DENR 11 – SEIZED CONVEYANCES DASHBOARD",
       dashboard_subtitle: "PD 705: Revised Forestry Code of the Philippines (1975)",
