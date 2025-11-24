@@ -269,7 +269,7 @@
         signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value)
             .then(() => {
                 hideLoader();
-                window.location.href = "/main/index.html";
+                window.location.href = "main/index.html";
             })
             .catch(e => { hideLoader(); alert(e.message); });
     };
@@ -281,7 +281,7 @@
         signInWithPopup(auth, provider)
             .then(() => {
                 hideLoader();
-                window.location.href = "/main/index.html";
+                window.location.href = "main/index.html";
             })
             .catch(e => { hideLoader(); alert(e.message); });
     };
