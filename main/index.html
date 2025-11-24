@@ -1231,7 +1231,8 @@
     let currentMonthIndex = -1; // -1 means "All Data"
 
     function logout() {
-      window.open('index.html', '_blank', 'noopener,noreferrer');
+      // navigate the current tab to the logout page; replace() avoids adding a history entry
+      window.location.replace('/index.html');
     }
 
     async function onConfigChange(config) {
