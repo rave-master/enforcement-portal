@@ -311,8 +311,8 @@
       // create or update user doc, then redirect
       createOrUpdateUserDoc(user, user.providerData?.[0]?.providerId || 'password')
         .finally(() => {
-          // redirect to /main/index.html (login page is /index.html)
-          window.location.href = '/main/index.html';
+          // redirect to main/index.html (login page is /index.html)
+          window.location.href = 'main/index.html';
         });
     }
 
@@ -328,7 +328,7 @@
         // update lastLogin and redirect
         await createOrUpdateUserDoc(user, 'password');
         // small delay so user can see message (optional)
-        setTimeout(() => { window.location.href = '/main/index.html'; }, 450);
+        setTimeout(() => { window.location.href = 'main/index.html'; }, 450);
       } catch (error) {
         showSuccessMessage(error.message || 'Sign-in failed');
       }
@@ -377,7 +377,7 @@
         showSuccessMessage(`Account created for ${name || user.email}`);
         await createOrUpdateUserDoc(user, 'password');
         // small delay then redirect
-        setTimeout(() => { window.location.href = '/main/index.html'; }, 500);
+        setTimeout(() => { window.location.href = 'main/index.html'; }, 500);
       } catch (error) {
         showSuccessMessage(error.message || 'Sign-up failed');
       }
