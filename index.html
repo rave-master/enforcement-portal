@@ -66,19 +66,36 @@
         position: relative;
     }
 
+    /* 🔥 Base Input Style */
     input {
         width: 100%;
         padding: 12px 42px 12px 12px;
         border-radius: 10px;
-        border: 1px solid #ccc;
+        border: 2px solid #ccc;
         font-size: 15px;
         outline: none;
-        transition: 0.2s;
+        transition: 0.25s ease-in-out;
         box-sizing: border-box;
+        background: #fff;
     }
 
+    /* 🔥 Flame Glow Animation */
+    @keyframes flameGlow {
+        0% { box-shadow: 0 0 6px #ffae42; }
+        50% { box-shadow: 0 0 14px #ff6a00, 0 0 28px #ff9100; }
+        100% { box-shadow: 0 0 6px #ffae42; }
+    }
+
+    /* 🔥 Flame effect on hover */
+    input:hover {
+        border-color: #ff7a00;
+        animation: flameGlow 1.2s ease-in-out infinite;
+    }
+
+    /* 🔥 Flame stays while typing */
     input:focus {
-        border-color: #6d28d9;
+        border-color: #ff6a00 !important;
+        animation: flameGlow 1.2s ease-in-out infinite;
     }
 
     /* Password eye button */
@@ -301,10 +318,10 @@
 
     // FORGOT PASSWORD
     window.forgotPassword = function () {
-        const email = prompt("Enter your email:");
+        const email = prompt("Enter your email: Wag Mo ng Kalimotan ha!😮‍💨😮‍💨");
         if (!email) return;
         sendPasswordResetEmail(auth, email)
-            .then(() => alert("Password reset sent!"))
+            .then(() => alert("Password reset sent na!📧 Check your inbox or spam"))
             .catch(e => alert(e.message));
     };
 
