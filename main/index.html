@@ -1195,19 +1195,8 @@ function logout() {
   // Clear session/local storage or authentication token
   localStorage.removeItem('userToken'); // example
   // Redirect to login page
-  window.location.href = '/login.html';
+  window.location.href = '/index.html';
 }
-
-// Example: populate user info dynamically
-function setUserInfo(user) {
-  const usernameEl = document.getElementById('username');
-  usernameEl.textContent = user.name || 'Unknown User';
-}
-
-
-
-
-
     const defaultConfig = {
       dashboard_title: "DENR 11 – SEIZED CONVEYANCES DASHBOARD",
       dashboard_subtitle: "PD 705: Revised Forestry Code of the Philippines (1975)",
