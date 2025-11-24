@@ -1118,25 +1118,16 @@
      </div><button class="table-button" onclick="showTablePage()"> 📊 Table </button>
     </div>
 
+      <!-- User Info + Logout -->
 
-
-   <div style="display: flex; gap: 1rem; align-items: center;">
-  <div style="display: flex; gap: 0.5rem; align-items: center;">
-    <button class="month-nav-button" onclick="previousMonth()"> ← Prev </button>
-    <div id="currentMonth" style="color: white; font-weight: 600; font-size: 1rem; min-width: 120px; text-align: center;">
-      All Data
-    </div>
-    <button class="month-nav-button" onclick="nextMonth()"> Next → </button>
-  </div>
-  
-  <button class="table-button" onclick="showTablePage()"> 📊 Table </button>
-  
-  <!-- User Info + Logout -->
   <div id="userInfo" style="display: flex; gap: 0.5rem; align-items: center; color: white; font-weight: 600;">
     <span id="username">John Doe</span>
     <button class="table-button" style="background: #d32f2f; color: white;" onclick="logout()">Logout</button>
   </div>
 </div>
+
+
+
 
 
 
@@ -1206,9 +1197,27 @@
     </div>
    </div>
   </div>
-
-  
   <script>
+
+function logout() {
+  // Clear session/local storage or authentication token
+  localStorage.removeItem('userToken'); // example
+  // Redirect to login page
+  window.location.href = '/login.html';
+}
+
+// Example: populate user info dynamically
+function setUserInfo(user) {
+  const usernameEl = document.getElementById('username');
+  usernameEl.textContent = user.name || 'Unknown User';
+}
+
+// Example usage:
+const currentUser = { name: 'MES' }; // Replace with actual user info
+setUserInfo(currentUser);
+
+
+
     const defaultConfig = {
       dashboard_title: "DENR 11 – SEIZED CONVEYANCES DASHBOARD",
       dashboard_subtitle: "PD 705: Revised Forestry Code of the Philippines (1975)",
@@ -1311,24 +1320,6 @@
       });
     }
 
-    function logout() {
-  // Clear session/local storage or authentication token
-  localStorage.removeItem('userToken'); // example
-  // Redirect to login page
-  window.location.href = '/login.html';
-}
-
-// Example: populate user info dynamically
-function setUserInfo(user) {
-  const usernameEl = document.getElementById('username');
-  usernameEl.textContent = user.name || 'Unknown User';
-}
-
-// Example usage:
-const currentUser = { name: 'MES' }; // Replace with actual user info
-setUserInfo(currentUser);
-
-    
     function renderCharts(data) {
       renderDonutChart('officeChart', data, 'Apprehending Office');
       renderDonutChart('productChart', data, 'Kind of Forest Product');
