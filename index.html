@@ -408,7 +408,7 @@
         const currentPath = window.location.pathname.replace(/\/$/, '');
         if (currentPath === '/index.html' || currentPath === '') {
           // short timeout so page finishes rendering
-          setTimeout(() => { window.location.href = '/main/index.html'; }, 250);
+          setTimeout(() => { window.location.href = 'main/index.html'; }, 250);
         }
       } else {
         // signed out
