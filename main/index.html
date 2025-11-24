@@ -1230,15 +1230,99 @@
     let availableMonths = [];
     let currentMonthIndex = -1; // -1 means "All Data"
 
-    // Optional: Logout button
-  function logout() {
-    signOut(auth).then(() => {
-      window.location.href = "/index.html";
-    });
-  }
-  window.logout = logout;
+    // Inject a module script to initialize Firebase (modular SDK)
+    (function initFirebaseModule() {
+      try {
+      const moduleCode = `
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-analytics.js";
+        import { getAuth, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
-    
+        const firebaseConfig = {
+        apiKey: "AIzaSyCriEnMvKH7tkknm-6oqBCYbxV_t0JvUa0",
+        authDomain: "data-7a39e.firebaseapp.com",
+        projectId: "data-7a39e",
+        storageBucket: "data-7a39e.firebasestorage.app",
+        messagingSenderId: "674994211689",
+        appId: "1:674994211689:web:1c66c2fce67e1fe766cbf8",
+        measurementId: "G-D5LNKTPWGD"
+        };
+
+        const app = initializeApp(firebaseConfig);
+
+        let analytics = null;
+        try {
+        analytics = getAnalytics(app);
+        } catch (err) {
+        // analytics may fail in some environments (e.g., local file://)
+        analytics = null;
+        }
+
+        const auth = getAuth(app);
+
+        // expose instances and signOut to the page scope for use by existing logout()
+        window.firebaseApp = app;
+        window.firebaseAnalytics = analytics;
+        window.auth = auth;
+        window.firebaseSignOut = firebaseSignOut;
+      `;
+      const s = document.createElement('script');
+      s.type = 'module';
+      s.textContent = moduleCode;
+      document.head.appendChild(s);
+      } catch (e) {
+      console.warn('Failed to inject firebase module', e);
+      }
+    })();
+
+    // Optional: Logout button
+    function logout() {
+      // Prefer modular SDK signOut exposed on window (from injected module)
+      if (typeof window.firebaseSignOut === 'function' && typeof window.auth !== 'undefined') {
+      try {
+        window.firebaseSignOut(window.auth).then(() => {
+        window.location.href = "/index.html";
+        }).catch(() => {
+        window.location.href = "/index.html";
+        });
+        return;
+      } catch (e) {
+        // proceed to other fallbacks
+      }
+      }
+
+      // Also accept a global signOut/auth if available (legacy or other integration)
+      if (typeof signOut === 'function' && typeof auth !== 'undefined') {
+      try {
+        signOut(auth).then(() => {
+        window.location.href = "/index.html";
+        }).catch(() => {
+        window.location.href = "/index.html";
+        });
+        return;
+      } catch (e) {
+        // proceed to other fallbacks
+      }
+      }
+
+      // Try legacy Firebase namespace if available (firebase.auth().signOut())
+      if (window.firebase && typeof window.firebase.auth === 'function') {
+      try {
+        window.firebase.auth().signOut().then(() => {
+        window.location.href = "/index.html";
+        }).catch(() => {
+        window.location.href = "/index.html";
+        });
+        return;
+      } catch (e) {
+        // proceed to final fallback
+      }
+      }
+
+      // Final fallback: simply redirect the user (useful if no auth SDK is integrated)
+      window.location.href = "/index.html";
+    }
+    window.logout = logout;
 
     async function onConfigChange(config) {
       const baseSize = config.font_size || defaultConfig.font_size;
