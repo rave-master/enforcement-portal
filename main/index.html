@@ -14,100 +14,6 @@
   <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
 
 <style>
-  /* Floating widget container */
-  #chatbotWidget {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 320px;
-    max-height: 500px;
-    z-index: 9999;
-    font-family: Inter, sans-serif;
-  }
-
-  /* Card styling */
-  .chatbotCard {
-    display: flex;
-    flex-direction: column;
-    background: rgba(11,18,32,0.95);
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    overflow: hidden;
-    height: 100%;
-  }
-
-  .chatbotCard .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background: rgba(0,0,0,0.2);
-    color: white;
-    font-weight: 600;
-  }
-
-  .messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .bubble {
-    max-width: 75%;
-    padding: 8px 12px;
-    border-radius: 12px;
-    word-break: break-word;
-    font-size: 14px;
-    line-height: 1.4;
-  }
-  .bubble.user { align-self: flex-end; background: #2b8cff; color: white; border-bottom-right-radius:6px; }
-  .bubble.bot { align-self: flex-start; background: #0ad29f; color: #012; border-bottom-left-radius:6px; }
-
-  .composer {
-    display: flex;
-    gap: 8px;
-    padding: 8px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.1);
-  }
-  .composer .input {
-    flex: 1;
-    padding: 8px;
-    border-radius: 10px;
-    border: none;
-    outline: none;
-    background: rgba(255,255,255,0.05);
-    color: white;
-  }
-  .composer .send {
-    padding: 8px 12px;
-    background: #7c5cff;
-    border: none;
-    color: white;
-    font-weight: 600;
-    border-radius: 10px;
-    cursor: pointer;
-  }
-
-  .authControls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 8px;
-    justify-content: space-around;
-  }
-
-  .btn { padding: 6px 10px; border-radius: 8px; font-size:12px; cursor:pointer; }
-  .btn.ghost { background:transparent; border:1px solid rgba(255,255,255,0.2); color:white; }
-</style>
-
-
-
-
-<style>
   #logoutBtn {
     position: fixed;
     right: 20px;
@@ -256,16 +162,6 @@
 </script>
 
 <script type="module">
-
-// Firebase imports
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  
-
-
-
     // Firebase imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signOut, onAuthStateChanged } 
@@ -281,97 +177,6 @@
       appId: "1:674994211689:web:1c66c2fce67e1fe766cbf8",
       measurementId: "G-D5LNKTPWGD"
     };
-
- 
-  const db = getFirestore(app);
-  const messagesRef = collection(db, "generate");
-
-  // UI refs
-  const messagesEl = document.getElementById("messages");
-  const inputEl = document.getElementById("input");
-  const sendBtn = document.getElementById("sendBtn");
-  const userMeta = document.getElementById("userMeta");
-  const closeBtn = document.getElementById("closeBtn");
-
-  const signUpBtn = document.getElementById("signUpBtn");
-  const signInBtn = document.getElementById("signInBtn");
-  const googleBtn = document.getElementById("googleBtn");
-  const signOutBtn = document.getElementById("signOutBtn");
-
-  // Close widget
-  closeBtn.onclick = () => document.getElementById("chatbotWidget").style.display = "none";
-
-  // Send prompt
-  async function sendPrompt(text){
-    if(!text.trim()) return;
-    await addDoc(messagesRef, { prompt: text.trim(), createTime: serverTimestamp(), uid: auth.currentUser?.uid || null });
-  }
-
-  sendBtn.addEventListener("click", async ()=>{
-    const text = inputEl.value;
-    if(!text.trim()) return;
-    addLocalMessage({kind:'user', text});
-    inputEl.value = "";
-    await sendPrompt(text);
-  });
-
-  inputEl.addEventListener("keydown", e=>{
-    if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); sendBtn.click(); }
-  });
-
-  function addLocalMessage({kind, text}) {
-    const b = document.createElement("div");
-    b.className = "bubble " + kind;
-    b.textContent = text;
-    messagesEl.appendChild(b);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function escapeHtml(s){ return s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
-
-  // Firestore listener
-  const q = query(messagesRef, orderBy("createTime"));
-  onSnapshot(q, snap=>{
-    messagesEl.innerHTML="";
-    snap.forEach(docSnap=>{
-      const data = docSnap.data();
-      if(data.prompt){ addLocalMessage({kind:'user', text:data.prompt}); }
-      if(data.response){ addLocalMessage({kind:'bot', text:data.response}); }
-    });
-  });
-
-  // Auth flows
-  onAuthStateChanged(auth, user=>{
-    if(user){
-      userMeta.textContent = `${user.displayName||user.email} (${user.uid})`;
-      signOutBtn.style.display="inline-block";
-      signInBtn.style.display="none";
-      signUpBtn.style.display="none";
-      googleBtn.style.display="none";
-    }else{
-      userMeta.textContent="Not signed in";
-      signOutBtn.style.display="none";
-      signInBtn.style.display="inline-block";
-      signUpBtn.style.display="inline-block";
-      googleBtn.style.display="inline-block";
-    }
-  });
-
-  signUpBtn.onclick = async ()=>{
-    const email = prompt("Email:"), pass = prompt("Password:");
-    if(!email||!pass) return;
-    await createUserWithEmailAndPassword(auth,email,pass);
-  };
-  signInBtn.onclick = async ()=>{
-    const email = prompt("Email:"), pass = prompt("Password:");
-    if(!email||!pass) return;
-    await signInWithEmailAndPassword(auth,email,pass);
-  };
-  googleBtn.onclick = async ()=>{ await signInWithPopup(auth,new GoogleAuthProvider()); };
-  signOutBtn.onclick = async ()=>{ await signOut(auth); };
-
-
-
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
@@ -1488,30 +1293,6 @@
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
  <body>
-
-<!-- Floating Chatbot Widget -->
-<div id="chatbotWidget">
-  <div class="chatbotCard">
-    <div class="header">
-      <h3>Gemini Chatbot</h3>
-      <div class="meta" id="userMeta">Not signed in</div>
-      <button id="closeBtn" style="background:none;color:white;border:none;cursor:pointer;font-size:16px;">✕</button>
-    </div>
-    <div class="messages" id="messages"></div>
-    <div class="composer">
-      <input id="input" class="input" placeholder="Type your message..." />
-      <button id="sendBtn" class="send">Send</button>
-    </div>
-    <div class="authControls">
-      <button id="signUpBtn" class="btn">Sign Up</button>
-      <button id="signInBtn" class="btn ghost">Sign In</button>
-      <button id="googleBtn" class="btn">Google Sign-In</button>
-      <button id="signOutBtn" class="btn ghost" style="display:none">Sign Out</button>
-    </div>
-  </div>
-</div>
-
-
   <div class="loading" id="loading">
    <div class="spinner"></div>
    <div>
