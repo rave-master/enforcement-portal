@@ -13,7 +13,153 @@
   <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <script src="https://unpkg.com/papaparse@5.3.2/papaparse.min.js"></script>
 
-<button id="logoutBtn" style="background-color: #d32f2f; color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">Logout</button>
+<style>
+  #logoutBtn {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 2200;
+    background-color: #d32f2f;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: grab;
+    font-size: 0.9rem;
+    user-select: none;
+    touch-action: none;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+  }
+  #logoutBtn.dragging { cursor: grabbing; transition: none; }
+</style>
+
+<button id="logoutBtn" title="Drag to move">Logout</button>
+
+<script>
+(function(){
+  const btn = document.getElementById('logoutBtn');
+  if (!btn) return;
+
+  let dragging = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  // Prevent single-click from triggering logout; require double-click/double-tap.
+  let allowClick = false;
+
+  function getClient(e){
+    return e.touches ? e.touches[0] : e;
+  }
+
+  function start(e){
+    const ev = getClient(e);
+    dragging = true;
+    btn.classList.add('dragging');
+    const rect = btn.getBoundingClientRect();
+    offsetX = ev.clientX - rect.left;
+    offsetY = ev.clientY - rect.top;
+    e.preventDefault();
+  }
+
+  function move(e){
+    if (!dragging) return;
+    const ev = getClient(e);
+    let left = ev.clientX - offsetX;
+    let top  = ev.clientY - offsetY;
+
+    left = Math.max(0, Math.min(left, window.innerWidth - btn.offsetWidth));
+    top  = Math.max(0, Math.min(top,  window.innerHeight - btn.offsetHeight));
+
+    btn.style.left = left + 'px';
+    btn.style.top  = top  + 'px';
+    btn.style.right = 'auto';
+    btn.style.bottom = 'auto';
+  }
+
+  function end(){
+    if (!dragging) return;
+    dragging = false;
+    btn.classList.remove('dragging');
+  }
+
+  // Intercept native clicks in capture phase and block them unless explicitly allowed.
+  btn.addEventListener('click', function(e){
+    if (!allowClick) {
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    } else {
+      // allow this one click to go through to existing listeners, then reset
+      allowClick = false;
+    }
+  }, true); // capture
+
+  // Mouse double-click => perform logout by letting a synthetic click pass
+  btn.addEventListener('dblclick', function(e){
+    // prevent default dblclick behavior and let original click handler run once
+    e.preventDefault();
+    allowClick = true;
+    // dispatch a click event that will reach existing listeners (our capture handler lets it through because allowClick is true)
+    setTimeout(() => {
+      btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+    }, 0);
+  });
+
+  // Touch double-tap detection (for mobile) — treat two taps within 350ms as double-tap
+  let lastTap = 0;
+  btn.addEventListener('touchend', function(e){
+    if (dragging) return;
+    const now = Date.now();
+    const delta = now - lastTap;
+    if (delta > 0 && delta <= 350) {
+      // double-tap detected
+      allowClick = true;
+      setTimeout(() => {
+        btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+      }, 0);
+      lastTap = 0;
+      e.preventDefault();
+    } else {
+      lastTap = now;
+      // consume single tap so it won't trigger logout; user must double-tap
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  // Mouse events
+  btn.addEventListener('mousedown', start);
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', end);
+
+  // Touch events
+  btn.addEventListener('touchstart', start, {passive:false});
+  document.addEventListener('touchmove', move, {passive:false});
+  document.addEventListener('touchend', end);
+
+  // Optional: remember position across page loads (uncomment to enable)
+  /*
+  const posKey = 'logoutBtnPos';
+  // restore
+  const stored = localStorage.getItem(posKey);
+  if (stored) {
+    try {
+      const p = JSON.parse(stored);
+      btn.style.left = p.left + 'px';
+      btn.style.top = p.top + 'px';
+      btn.style.right = 'auto';
+      btn.style.bottom = 'auto';
+    } catch(e){}
+  }
+  // save on end
+  function savePos(){
+    const rect = btn.getBoundingClientRect();
+    localStorage.setItem(posKey, JSON.stringify({ left: rect.left, top: rect.top }));
+  }
+  document.addEventListener('mouseup', savePos);
+  document.addEventListener('touchend', savePos);
+  */
+})();
+</script>
 
 <script type="module">
     // Firebase imports
@@ -82,12 +228,15 @@
     }
 
     .header {
-      background: linear-gradient(135deg, #004d40 0%, #00796b 100%);
-      color: white;
+      /* semi-transparent gradient + subtle blur for translucency */
+      background: linear-gradient(135deg, rgba(0,77,64,0.90) 0%, rgba(0,121,107,0.75) 100%);
+      color: rgba(255,255,255,0.95);
       padding: 1rem 2rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
       position: relative;
       z-index: 1000;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
 
     .header h1 {

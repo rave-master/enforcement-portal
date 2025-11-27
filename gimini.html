@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gemini Chatbot — Full UI + Auth</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa4b2; --accent:#7c5cff;
+      --user:#2b8cff; --bot:#0ad29f; --glass: rgba(255,255,255,0.04);
+      --radius:14px;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    body{
+      margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#071029 0%, #071a2a 100%); min-height:100vh; display:flex; align-items:center; justify-content:center;
+      padding:24px;
+    }
+
+    /* Container */
+    .app {
+      width:100%; max-width:980px; height:80vh; display:grid; grid-template-columns: 320px 1fr; gap:18px;
+    }
+
+    /* Left panel (auth + info) */
+    .sidebar {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
+      padding:18px; border-radius:var(--radius); color:var(--muted); display:flex; flex-direction:column; gap:12px;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+    }
+    .brand { font-weight:700; font-size:18px; color:white; }
+    .sub { font-size:13px; color:var(--muted); }
+    .auth {
+      display:flex; gap:8px; align-items:center; margin-top:8px;
+    }
+    .btn {
+      background:var(--glass); color:white; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);
+      cursor:pointer; font-weight:600; font-size:13px;
+    }
+    .btn.ghost { background:transparent; border:1px dashed rgba(255,255,255,0.04); }
+    .small { font-size:13px; color:var(--muted); }
+
+    /* Chat area */
+    .card {
+      background: linear-gradient(0deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:12px; border-radius:var(--radius); display:flex; flex-direction:column; overflow:hidden;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+    }
+    .header { display:flex; align-items:center; justify-content:space-between; padding:8px 6px; border-bottom:1px solid rgba(255,255,255,0.02); }
+    .header h3 { margin:0; color:white; font-size:16px; }
+    .header .meta { color:var(--muted); font-size:13px; }
+
+    .messages {
+      flex:1; overflow:auto; padding:12px; display:flex; flex-direction:column; gap:10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.0), rgba(255,255,255,0.01));
+    }
+
+    .bubble {
+      max-width:75%; padding:12px 14px; border-radius:14px; line-height:1.4;
+      word-break:break-word; font-size:14px;
+    }
+    .bubble.user { align-self:flex-end; background:linear-gradient(90deg,var(--user), #4ea1ff); color:white; border-bottom-right-radius:6px; }
+    .bubble.bot  { align-self:flex-start; background:linear-gradient(90deg,#073b3a,var(--bot)); color:#012; border-bottom-left-radius:6px; }
+    .metaSmall { font-size:12px; color:var(--muted); margin-top:6px; }
+
+    .typing {
+      display:flex; gap:6px; align-items:center; padding:6px 10px; color:var(--muted); font-size:13px;
+    }
+    .dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.14); animation: blink 1.1s infinite; }
+    .dot:nth-child(2){ animation-delay: .15s; } .dot:nth-child(3){ animation-delay: .3s; }
+    @keyframes blink { 0% { opacity:0.18; transform: translateY(0);}
+      50% { opacity:1; transform: translateY(-6px);}
+      100% { opacity:0.18; transform: translateY(0);}
+    }
+
+    /* composer */
+    .composer { display:flex; gap:8px; padding:10px; border-top:1px solid rgba(255,255,255,0.02); align-items:center; }
+    .input {
+      flex:1; padding:10px 12px; background:rgba(255,255,255,0.02); border-radius:12px; border:1px solid rgba(255,255,255,0.03);
+      color:white; outline:none; font-size:14px;
+    }
+    .send { padding:10px 14px; background:linear-gradient(90deg, var(--accent), #5ec2ff); border-radius:10px; color:white; font-weight:700; cursor:pointer; border:none; }
+
+    /* login form modal small */
+    .loginBox { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+    .field { padding:8px; border-radius:8px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); color:white; outline:none; }
+    .oauth { display:flex; gap:8px; }
+
+    /* responsive */
+    @media (max-width:900px){
+      .app { grid-template-columns: 1fr; height:90vh; }
+      .sidebar { order:2; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar: Auth + Info -->
+    <div class="sidebar">
+      <div>
+        <div class="brand">Gemini Chatbot — Demo</div>
+        <div class="sub">Secure chat UI with Firebase Auth and Firestore integration.</div>
+      </div>
+
+      <div id="userPanel" style="margin-top:12px;">
+        <div class="small">Not signed in</div>
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button id="signUpBtn" class="btn">Sign up (email)</button>
+          <button id="signInBtn" class="btn ghost">Sign in</button>
+        </div>
+
+        <div style="margin-top:10px;">
+          <button id="googleBtn" class="btn">Sign in with Google</button>
+          <button id="signOutBtn" class="btn ghost" style="display:none">Sign Out</button>
+        </div>
+
+        <div style="margin-top:14px;">
+          <div class="small">When signed in, messages will include your UID. The Firestore path used: <code>generate</code></div>
+        </div>
+      </div>
+
+      <div style="margin-top:auto;">
+        <div class="small">Notes:</div>
+        <ul style="margin:6px 0 0 18px; color:var(--muted); font-size:13px;">
+          <li>Ensure the Gemini extension listens to collection: <strong>generate</strong></li>
+          <li>We write `prompt` and `createTime` (serverTimestamp)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Chat Panel -->
+    <div class="card" role="main">
+      <div class="header">
+        <h3>Chat</h3>
+        <div class="meta" id="userMeta">Not signed in</div>
+      </div>
+
+      <div class="messages" id="messages" aria-live="polite"></div>
+
+      <div class="composer">
+        <input id="input" class="input" placeholder="Type your message..." />
+        <button id="sendBtn" class="send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase v10 modular imports -->
+  <script type="module">
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } 
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // --- YOUR FIREBASE CONFIG (you already provided this) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyCriEnMvKH7tkknm-6oqBCYbxV_t0JvUa0",
+      authDomain: "data-7a39e.firebaseapp.com",
+      projectId: "data-7a39e",
+      storageBucket: "data-7a39e.firebasestorage.app",
+      messagingSenderId: "674994211689",
+      appId: "1:674994211689:web:1c66c2fce67e1fe766cbf8",
+      measurementId: "G-D5LNKTPWGD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // COLLECTION: must match the extension's configured path
+    const messagesRef = collection(db, "generate");
+
+    // UI refs
+    const messagesEl = document.getElementById("messages");
+    const inputEl = document.getElementById("input");
+    const sendBtn = document.getElementById("sendBtn");
+    const userMeta = document.getElementById("userMeta");
+
+    const signUpBtn = document.getElementById("signUpBtn");
+    const signInBtn = document.getElementById("signInBtn");
+    const googleBtn = document.getElementById("googleBtn");
+    const signOutBtn = document.getElementById("signOutBtn");
+
+    // Simple prompt sending function
+    async function sendPrompt(text) {
+      if (!text || !text.trim()) return;
+      // Create doc with prompt and server timestamp
+      await addDoc(messagesRef, {
+        prompt: text.trim(),
+        createTime: serverTimestamp(),
+        uid: auth.currentUser ? auth.currentUser.uid : null
+      });
+    }
+
+    // UI: send button and enter key
+    sendBtn.addEventListener("click", async () => {
+      const text = inputEl.value;
+      if (!text.trim()) return;
+      // Optimistic UI: show user bubble immediately
+      addLocalMessage({ kind: 'user', text });
+      inputEl.value = "";
+      sendBtn.disabled = true;
+      try {
+        await sendPrompt(text);
+      } catch (err) {
+        console.error("Error sending prompt:", err);
+        alert("Failed to send message. Check console.");
+      }
+      sendBtn.disabled = false;
+    });
+    inputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendBtn.click();
+      }
+    });
+
+    // Format timestamp for display (fallback)
+    function timeAgo(ts){
+      if (!ts) return "";
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleString();
+    }
+
+    // Keep a small in-memory map for documents waiting for responses (to show typing)
+    const waitingDocs = new Set();
+
+    // Render helpers
+    function addLocalMessage({ kind, text, time }){
+      const b = document.createElement("div");
+      b.className = "bubble " + (kind === 'user' ? 'user' : 'bot');
+      b.innerHTML = `<div>${escapeHtml(text)}</div>` + (time ? `<div class="metaSmall">${time}</div>` : "");
+      messagesEl.appendChild(b);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function escapeHtml(unsafe){
+      return unsafe
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    // Keep a mapping docId -> DOM node for updating bot replies inline
+    const docNodes = new Map();
+
+    // Subscribe to Firestore collection ordered by createTime (serverTimestamp supported)
+    const q = query(messagesRef, orderBy("createTime"));
+
+    onSnapshot(q, (snap) => {
+      // Clear and re-render (simple approach)
+      messagesEl.innerHTML = "";
+      docNodes.clear();
+      waitingDocs.clear();
+
+      snap.forEach(docSnap => {
+        const id = docSnap.id;
+        const data = docSnap.data();
+        // If doc has prompt -> show user bubble
+        if (data.prompt) {
+          const userBubble = document.createElement("div");
+          userBubble.className = "bubble user";
+          userBubble.innerHTML = `<div>${escapeHtml(data.prompt)}</div>
+            <div class="metaSmall">${data.uid ? 'uid: '+data.uid+' • ' : ''}${timeAgo(data.createTime)}</div>`;
+          messagesEl.appendChild(userBubble);
+        }
+
+        // If doc has response -> show bot bubble
+        if (data.response) {
+          const botBubble = document.createElement("div");
+          botBubble.className = "bubble bot";
+          botBubble.innerHTML = `<div>${escapeHtml(data.response)}</div>
+            <div class="metaSmall">${timeAgo(data.createTime)}</div>`;
+          messagesEl.appendChild(botBubble);
+        } else {
+          // If no response yet, add a typing indicator (bot is working)
+          const typingBox = document.createElement("div");
+          typingBox.className = "typing";
+          typingBox.innerHTML = `<div class="dot"></div><div class="dot"></div><div class="dot"></div><div style="margin-left:8px">Bot is typing…</div>`;
+          messagesEl.appendChild(typingBox);
+          waitingDocs.add(id);
+        }
+      });
+
+      // Scroll to bottom after render
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }, (err) => {
+      console.error("Snapshot error:", err);
+    });
+
+    // ---------- Simple Auth flows ----------
+    function showSignedIn(user){
+      userMeta.textContent = `${user.displayName || user.email} (${user.uid})`;
+      signOutBtn.style.display = "inline-block";
+      signInBtn.style.display = "none";
+      signUpBtn.style.display = "none";
+      googleBtn.style.display = "none";
+      document.querySelectorAll(".small").forEach(el => el.style.color = "var(--muted)");
+    }
+    function showSignedOut(){
+      userMeta.textContent = `Not signed in`;
+      signOutBtn.style.display = "none";
+      signInBtn.style.display = "inline-block";
+      signUpBtn.style.display = "inline-block";
+      googleBtn.style.display = "inline-block";
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) showSignedIn(user);
+      else showSignedOut();
+    });
+
+    // Sign up with prompted email & password (very small flow)
+    signUpBtn.addEventListener("click", async () => {
+      const email = prompt("Enter email for sign up:");
+      if (!email) return;
+      const pass = prompt("Enter password (>=6 chars):");
+      if (!pass) return;
+      try {
+        await createUserWithEmailAndPassword(auth, email, pass);
+        alert("Signed up — you are now logged in.");
+      } catch (err) {
+        console.error(err);
+        alert("Sign up failed: " + (err.message || err));
+      }
+    });
+
+    signInBtn.addEventListener("click", async () => {
+      const email = prompt("Enter email:");
+      if (!email) return;
+      const pass = prompt("Enter password:");
+      if (!pass) return;
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        alert("Signed in.");
+      } catch (err) {
+        console.error(err);
+        alert("Sign in failed: " + (err.message || err));
+      }
+    });
+
+    // Google OAuth
+    googleBtn.addEventListener("click", async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        console.error(err);
+        alert("Google sign-in failed: " + (err.message || err));
+      }
+    });
+
+    signOutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      alert("Signed out.");
+    });
+
+    // Small UX: allow pressing Ctrl+Enter for newline; Enter sends.
+    inputEl.addEventListener("keydown", (e) => {
+      // handled above
+    });
+
+  </script>
+</body>
+</html>
